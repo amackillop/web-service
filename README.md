@@ -3,13 +3,16 @@ This is a simple api that downloads images from the internet and uploads them to
 
 ## Setup
 To run the flask app in a docker container, run:
+
 `bash start.sh`
 
 In order to run locally, install pipenv (if you do not have it already) and use that to build the virtual environment before launching the app.
-`pip install pipenv`
-`pipenv install`
-`pipenv shell`
-`python src/spp.py`
+
+```pip install pipenv
+pipenv install
+pipenv shell
+python src/spp.py
+```
 
 To run the tests cd into the src directory first.
 `cd src`
@@ -21,12 +24,14 @@ After starting the application, post jobs to to the following URL:
 `http://0.0.0.0:5000/v1/images/upload/`
 
 The body is an array of URLs to download. Example:
+```
 {
     "urls": [
         "http://www.dummyimage.com/100x100",
         "http://www.dummyimage.com/200x200"
     ]
 }
+```
 
 Successful post requests will yield a uuid in order to track the progress of the job.
 Check the status with the following end point:
