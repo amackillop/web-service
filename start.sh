@@ -1,8 +1,8 @@
-docker build -t flask_app .
+docker build -t web-service:latest .
 
 if [[ $1 = background ]]
 then
-  docker run -d --name flask_container -p 5000:5000 flask_app
+  docker run -d --name web-service-container -p 5000:5000 web-service
 else
-  docker run -p 5000:5000 flask_app
+  docker run -p 5000:5000 web-service
 fi
