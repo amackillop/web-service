@@ -15,9 +15,10 @@ python src/spp.py
 ```
 
 To run the tests cd into the src directory first.
-`cd src`
-`pytest`
-
+```
+cd src
+pytest
+```
 ## Endpoints
 
 After starting the application, post jobs to to the following URL:
