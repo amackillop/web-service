@@ -22,6 +22,7 @@ pytest
 ## Endpoints
 
 After starting the application, post jobs to to the following URL:
+
 `http://0.0.0.0:5000/v1/images/upload/`
 
 The body is an array of URLs to download. Example:
