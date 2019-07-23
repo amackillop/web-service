@@ -1,9 +1,12 @@
 from dataclasses import dataclass, field
-from typing import Type, List, Union, NewType, Mapping, TypeVar, Callable, Iterable
+from typing import Type, List, Tuple, Union, TypeVar, Callable, Iterable, Iterator
 import uuid
 import datetime as dt
 
 T = TypeVar('T')
+
+A = TypeVar('A')
+B = TypeVar('B')
 
 class Pending: pass
 class InProgress: pass
@@ -24,4 +27,3 @@ class Job:
     finished: bool = False
     status: Status = Type[Pending]
     
-

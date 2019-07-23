@@ -8,7 +8,7 @@ from functools import wraps
 
 from my_types import *
 
-def background(f):
+def background(f:Callable[..., None]) -> Callable:
     @wraps(f)
     def wrapped(*args, **kwargs):
         loop = asyncio.get_event_loop()
@@ -31,18 +31,18 @@ async def post_image(request: web.Request):
     handle_job()
     return web.Response(text=str(job.job_id))
 
-async def get_status(request: web.Request):
+async def get_status(request: web.Request) -> web.Response:
     job_id = request.match_info.get('job_id', None)
     if job_id is None:
         return web.Response(text=f'Job {job_id} was not found.')
     job = request.app['jobs'][job_id]
     return web.Response(text=job.created)
 
-async def get_images(request: web.Request):
+async def get_images(request: web.Request) -> web.Response:
     return web.Response(text='hello')
     
 @background
-def handle_job():
+def handle_job() -> None:
     import time
     time.sleep(10)
     print('done sleeping')
@@ -51,19 +51,15 @@ def handle_job():
 def is_valid_url(url: str) -> bool:
     try:
         result = urlparse(url)
-        return all([result.scheme in ['http', 'https'], result.netloc, result.path])
     except:
         return False
+    return all([result.scheme in ['http', 'https'], result.netloc, result.path])
 
 
-def partition(predicate: Callable[[T], bool] , iterable: Iterable[T]):
+def partition(predicate: Callable[[T], bool] , iterable: Iterable[T]) -> Tuple[Iterator[T], Iterator[T]]:
     'Use a predicate to partition entries into false entries and true entries'
     t1, t2 = itertools.tee(iterable)
     return filter(predicate, t1), itertools.filterfalse(predicate, t2)
-
-
-
-
 
 # App
 if __name__ == '__main__':
