@@ -3,6 +3,8 @@ from typing import Type, List, Tuple, Union, TypeVar, NewType, Callable, Iterabl
 import uuid
 import datetime as dt
 
+T = TypeVar('T')
+
 FuncType = Callable[..., Any]
 Func = TypeVar('Func', bound=FuncType)
 
@@ -21,7 +23,7 @@ Status = Union[Pending, InProgress, Complete]
 @dataclass(frozen=True)
 class Uploaded:
     pending: List[str] = field(default_factory=list)
-    complete: List[str] = field(default_factory=list)
+    completed: List[str] = field(default_factory=list)
     failed: List[str] = field(default_factory=list)
 
 @dataclass()
@@ -29,6 +31,6 @@ class Job:
     uploaded: Uploaded
     job_id: str
     created: str = dt.datetime.utcnow().isoformat()
-    finished: bool = False
+    finished: str = ''
     status: Status = Pending()
     

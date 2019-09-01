@@ -1,12 +1,12 @@
 import asyncio
 from aiohttp import web
-from urllib.parse import urlparse
 import itertools
 import requests
 from functools import wraps
 
-
+from dataclasses import replace, astuple
 from my_types import *
+import helpers as hf
 
 def background(func: Func) -> Func:
     @wraps(func)
@@ -21,7 +21,7 @@ async def post_image(request: web.Request):
     urls = req.get('urls', None)
     if urls is None: 
         return web.Response(status=400, text='Bad', reason='Bad Request. No `urls` field.')
-    valid, invalid = partition(is_valid_url, urls)
+    valid, invalid = hf.partition(hf.is_valid_url, urls)
     uploaded = Uploaded(pending=list(valid), failed=list(invalid))
     job = Job(job_id=str(uuid.uuid4()), uploaded=uploaded)
     request.app['jobs'][str(job.job_id)] = job
@@ -41,25 +41,24 @@ async def get_images(request: web.Request) -> web.Response:
 @background
 def handle_job(job: Job) -> None:
     import time
-    print(job)
-    time.sleep(10)
-    print('done sleeping')
+    pending, completed, failed = astuple(job.uploaded)
+    job.status = InProgress()
+    for url in pending:
+        try:
+            resp = hf.download_image(url)
+        except Exception as e:
+            print(f'Failed: {url}')
+            failed.append(url)
+            job.uploaded = replace(job.uploaded, pending=hf.tail(pending), failed=failed)
+        else:
+            print(f'Success: {url}')
+            completed.append(url)
+            job.uploaded = replace(job.uploaded, pending=hf.tail(pending), completed=completed)
+    job.finished = dt.datetime.utcnow().isoformat()
+    job.status = Complete()
+    # time.sleep(10)
+    # print('done sleeping')
 
-# Helpers
-def is_valid_url(url: str) -> bool:
-    try:
-        result = urlparse(url)
-    except:
-        return False
-    return all([result.scheme in ['http', 'https'], result.netloc, result.path])
-
-
-def partition(predicate: Callable[[T], bool] , iterable: Iterable[T]) -> Tuple[Iterator[T], Iterator[T]]:
-    'Use a predicate to partition entries into false entries and true entries'
-    t1, t2 = itertools.tee(iterable)
-    return filter(predicate, t1), itertools.filterfalse(predicate, t2)
-
-# App
 if __name__ == '__main__':
     host = '0.0.0.0'
     port = 8000
