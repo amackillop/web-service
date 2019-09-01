@@ -33,7 +33,7 @@ async def get_status(request: web.Request) -> web.Response:
     job = request.app['jobs'].get(job_id, None)
     if job is None:
         return web.Response(text=f'Job {job_id} was not found.')
-    return web.Response(text=job.created)
+    return web.Response(text=str(job))
 
 async def get_images(request: web.Request) -> web.Response:
     return web.Response(text='hello')
