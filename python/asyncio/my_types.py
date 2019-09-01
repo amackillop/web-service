@@ -1,9 +1,14 @@
 from dataclasses import dataclass, field
-from typing import Type, List, Tuple, Union, TypeVar, Callable, Iterable, Iterator
+from typing import Type, List, Tuple, Union, TypeVar, Callable, Iterable, Iterator, Any
 import uuid
 import datetime as dt
 
-T, A, B = TypeVar('T'), TypeVar('B'), TypeVar('B')
+T = TypeVar('T')
+A = TypeVar('A')
+B = TypeVar('B')
+
+FuncType = Callable[..., Any]
+Func = TypeVar('Func', bound=FuncType)
 
 class Pending: pass
 class InProgress: pass

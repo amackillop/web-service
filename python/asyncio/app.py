@@ -8,11 +8,11 @@ from functools import wraps
 
 from my_types import *
 
-def background(f:Callable[..., None]) -> Callable:
-    @wraps(f)
+def background(func: Func) -> Func:
+    @wraps(func)
     def wrapped(*args, **kwargs):
         loop = asyncio.get_event_loop()
-        return loop.run_in_executor(None, f, *args, **kwargs)
+        loop.run_in_executor(None, func, *args, **kwargs)
     return wrapped
 
 # Routes
@@ -25,7 +25,7 @@ async def post_image(request: web.Request):
     uploaded = Uploaded(pending=list(valid), failed=list(invalid))
     job = Job(job_id=str(uuid.uuid4()), uploaded=uploaded)
     request.app['jobs'][str(job.job_id)] = job
-    handle_job()
+    handle_job(job)
     return web.Response(text=str(job.job_id))
 
 async def get_status(request: web.Request) -> web.Response:
@@ -39,7 +39,7 @@ async def get_images(request: web.Request) -> web.Response:
     return web.Response(text='hello')
     
 @background
-def handle_job(job) -> None:
+def handle_job(job: Job) -> None:
     import time
     print(job)
     time.sleep(10)
