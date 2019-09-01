@@ -39,8 +39,9 @@ async def get_images(request: web.Request) -> web.Response:
     return web.Response(text='hello')
     
 @background
-def handle_job() -> None:
+def handle_job(job) -> None:
     import time
+    print(job)
     time.sleep(10)
     print('done sleeping')
 
