@@ -5,7 +5,7 @@ import logging
 import requests
 import uuid
 
-from typing import List, Dict, NamedTuple, Iterable
+from typing import List, Dict, NamedTuple, Iterable, Any
 import http_utils as http
 import conc_utils as conc
 import reprlib
@@ -19,8 +19,8 @@ class JobHandler():
     """
 
     # The following attributes hold the state of the api.
-    jobs = {}
-    images = []
+    jobs: dict = {}
+    images: List[str] = []
 
     def __init__(self, client_id: str, num_threads: int, conc_reqs: int = 1):
         """
@@ -64,7 +64,7 @@ class JobHandler():
         }
         return job
         
-    def submit(self, urls: List[str]) -> futures.Future:
+    def submit(self, urls: List[str]) -> dict:
         """Submits a job to the handler. Implemented as a thread pool."""
         job = self._make_job(urls)
         self.jobs[job['id']] = job
@@ -83,7 +83,7 @@ class JobHandler():
         executor.shutdown(wait=True)
         return job
 
-    def _handle_futures(self, job: dict, to_do: List[str]) -> dict:
+    def _handle_futures(self, job: dict, to_do: List[futures.Future]) -> dict:
         """Handle futures as they complete. Update state upon each completion."""
         future_iter = futures.as_completed(to_do)
         pending = job['uploaded']['pending']

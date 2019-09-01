@@ -12,10 +12,7 @@ def background(f:Callable[..., None]) -> Callable:
     @wraps(f)
     def wrapped(*args, **kwargs):
         loop = asyncio.get_event_loop()
-        if callable(f):
-            return loop.run_in_executor(None, f, *args, **kwargs)
-        else:
-            raise TypeError('Task must be a callable')    
+        return loop.run_in_executor(None, f, *args, **kwargs)
     return wrapped
 
 # Routes
@@ -33,9 +30,9 @@ async def post_image(request: web.Request):
 
 async def get_status(request: web.Request) -> web.Response:
     job_id = request.match_info.get('job_id', None)
-    if job_id is None:
+    job = request.app['jobs'].get(job_id, None)
+    if job is None:
         return web.Response(text=f'Job {job_id} was not found.')
-    job = request.app['jobs'][job_id]
     return web.Response(text=job.created)
 
 async def get_images(request: web.Request) -> web.Response:

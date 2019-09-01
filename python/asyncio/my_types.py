@@ -3,10 +3,7 @@ from typing import Type, List, Tuple, Union, TypeVar, Callable, Iterable, Iterat
 import uuid
 import datetime as dt
 
-T = TypeVar('T')
-
-A = TypeVar('A')
-B = TypeVar('B')
+T, A, B = TypeVar('T'), TypeVar('B'), TypeVar('B')
 
 class Pending: pass
 class InProgress: pass
