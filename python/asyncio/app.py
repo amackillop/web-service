@@ -30,7 +30,7 @@ async def post_image(request: web.Request):
     uploaded = Uploaded(pending=list(valid), failed=list(invalid))
     job = Job(job_id=str(uuid.uuid4()), uploaded=uploaded)
     request.app['jobs'][str(job.job_id)] = job
-    await handle_job(job)
+    asyncio.create_task(handle_job(job))
     return web.Response(text=str(job.job_id))
 
 async def get_status(request: web.Request) -> web.Response:
