@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Type, List, Tuple, Union, TypeVar, NewType, Callable, Iterable, Iterator, Any
+from typing import *
 import uuid
 import datetime as dt
 

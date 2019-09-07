@@ -30,7 +30,7 @@ async def post_image(request: web.Request):
     uploaded = Uploaded(pending=list(valid), failed=list(invalid))
     job = Job(job_id=str(uuid.uuid4()), uploaded=uploaded)
     request.app['jobs'][str(job.job_id)] = job
-    handle_job(job)
+    await handle_job(job)
     return web.Response(text=str(job.job_id))
 
 async def get_status(request: web.Request) -> web.Response:
@@ -44,16 +44,19 @@ async def get_status(request: web.Request) -> web.Response:
 async def get_images(request: web.Request) -> web.Response:
     return web.Response(text='hello')
     
-@background
+# @background
 async def handle_job(job: Job) -> None:
     import time
+    print('hello')
+    # asyncio.sleep(5)
     pending, completed, failed = astuple(job.uploaded)
     job.status = InProgress()
     for url in pending:
         try:
-            image = hf.download_image(url)
+            image = await hf.download_image(url)
         except Exception as e:
             print(f'Failed: {url}')
+            print(e)
             failed.append(url)
             job.uploaded = replace(job.uploaded, pending=hf.tail(pending), failed=failed)
         else:
@@ -81,7 +84,7 @@ def _upload_to_imgur(self, image_as_b64: str) -> requests.Response:
     resp = hf.make_request('POST', url, headers=headers, data=data)
     return resp
 
-async def start(host: str, port: int) -> Tuple[web.AppRunner, web.TCPSite]:
+async def start(app, host: str, port: int) -> Tuple[web.AppRunner, web.TCPSite]:
     runner = web.AppRunner(app)
     await runner.setup()
     server = web.TCPSite(runner, host, port)
@@ -89,10 +92,21 @@ async def start(host: str, port: int) -> Tuple[web.AppRunner, web.TCPSite]:
     return runner, server
 
 if __name__ == '__main__':
+    import tracemalloc
+    tracemalloc.start()
     host = '0.0.0.0'
     port = 8000
     app = web.Application()
     app.add_routes(routes)
     app['jobs'] = dict()
-    web.run_app(app, host=host, port=port)
+    loop = asyncio.get_event_loop()
+    runner, server = loop.run_until_complete(start(app, host, port))
+    print('======== Running on http://0.0.0.0:8000 ========\n'
+          '(Press CTRL+C to quit)')
+    try:
+        loop.run_forever()
+    except KeyboardInterrupt:
+        loop.run_until_complete(runner.cleanup())
+    
+    # web.run_app(app, host=host, port=port)
     # asyncio.run(main(address, port))

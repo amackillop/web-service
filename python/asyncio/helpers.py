@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 from collections import deque
 import itertools
 import aiohttp
+import contextlib
 
 from my_types import *
 
@@ -19,21 +20,26 @@ def is_valid_url(url: str) -> bool:
         return False
     return all([result.scheme in ['http', 'https'], result.netloc, result.path])
 
-async def make_request(method: str, url: str, **kwargs) -> aiohttp.ClientResponse:
-    async with aiohttp.ClientSession() as session:
-        async with getattr(session, method)() as resp:
-            if resp.status < 200 or resp.status >= 300:
-                resp.raise_for_status()
-            await resp
+@contextlib.asynccontextmanager
+async def make_request(method: str, url: str, **kwargs) -> AsyncIterator:
+    try:
+        async with aiohttp.ClientSession(raise_for_status=True) as session:
+            async with getattr(session, method)(url) as resp:
+                yield resp
+    finally:
+        pass
+
 
 async def download_image(url: str) -> str:
     """Download and verify image from given URL."""
-    resp = make_request('get', url)
+    async with make_request('get', url) as resp:
+        content = await resp.read()
+
     # Weak check that the page content is actually an image. 
-    if imghdr.what(BytesIO(resp.content)) is None:
+    if imghdr.what(BytesIO(content)) is None:
         msg = f'Not a valid image at {url}.'
         raise IOError(msg)
-    await base64.b64encode(resp.text()).decode('ascii')
+    return base64.b64encode(content).decode('ascii')
 
 
 # Functional Programming FTW
