@@ -81,6 +81,13 @@ def _upload_to_imgur(self, image_as_b64: str) -> requests.Response:
     resp = hf.make_request('POST', url, headers=headers, data=data)
     return resp
 
+async def start(host: str, port: int) -> Tuple[web.AppRunner, web.TCPSite]:
+    runner = web.AppRunner(app)
+    await runner.setup()
+    server = web.TCPSite(runner, host, port)
+    await server.start()
+    return runner, server
+
 if __name__ == '__main__':
     host = '0.0.0.0'
     port = 8000
