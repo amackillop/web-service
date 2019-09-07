@@ -30,7 +30,7 @@ class Uploaded:
 class Job:
     uploaded: Uploaded
     job_id: str
-    created: str = dt.datetime.utcnow().isoformat()
+    created: str = field(default_factory=lambda: dt.datetime.utcnow().isoformat())
     finished: str = ''
     status: Status = Pending()
     

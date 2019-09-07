@@ -33,6 +33,7 @@ async def post_image(request: web.Request):
     asyncio.create_task(handle_job(job))
     return web.Response(text=str(job.job_id))
 
+@routes.get('/v1/images/upload/{job_id}')
 async def get_status(request: web.Request) -> web.Response:
     job_id = request.match_info.get('job_id', None)
     job = request.app['jobs'].get(job_id, None)
@@ -46,9 +47,6 @@ async def get_images(request: web.Request) -> web.Response:
     
 # @background
 async def handle_job(job: Job) -> None:
-    import time
-    print('hello')
-    # asyncio.sleep(5)
     pending, completed, failed = astuple(job.uploaded)
     job.status = InProgress()
     for url in pending:
@@ -58,11 +56,11 @@ async def handle_job(job: Job) -> None:
             print(f'Failed: {url}')
             print(e)
             failed.append(url)
-            job.uploaded = replace(job.uploaded, pending=hf.tail(pending), failed=failed)
+            job.uploaded = replace(job.uploaded, pending=hf.tail(job.uploaded.pending), failed=failed)
         else:
             print(f'Success: {url}')
             completed.append(url)
-            job.uploaded = replace(job.uploaded, pending=hf.tail(pending), completed=completed)
+            job.uploaded = replace(job.uploaded, pending=hf.tail(job.uploaded.pending), completed=completed)
     job.finished = dt.datetime.utcnow().isoformat()
     job.status = Complete()
 
