@@ -7,6 +7,7 @@ import reprlib
 from urllib.parse import urlparse
 from collections import deque
 import itertools
+import aiohttp
 
 from my_types import *
 
@@ -18,21 +19,21 @@ def is_valid_url(url: str) -> bool:
         return False
     return all([result.scheme in ['http', 'https'], result.netloc, result.path])
 
-def make_request(method: str, url: str, **kwargs) -> requests.Response:
-    """Make a request. Raises an exception if unsuccessful."""
-    resp = requests.request(method, url, **kwargs)
-    if resp.status_code < 200 or resp.status_code >= 300:
-        resp.raise_for_status()
-    return resp
+async def make_request(method: str, url: str, **kwargs) -> aiohttp.ClientResponse:
+    async with aiohttp.ClientSession() as session:
+        async with getattr(session, method)() as resp:
+            if resp.status < 200 or resp.status >= 300:
+                resp.raise_for_status()
+            await resp
 
-def download_image(url: str) -> requests.Response:
+async def download_image(url: str) -> str:
     """Download and verify image from given URL."""
-    resp = make_request('GET', url)
+    resp = make_request('get', url)
     # Weak check that the page content is actually an image. 
     if imghdr.what(BytesIO(resp.content)) is None:
         msg = f'Not a valid image at {url}.'
         raise IOError(msg)
-    return resp
+    await base64.b64encode(resp.text()).decode('ascii')
 
 
 # Functional Programming FTW
