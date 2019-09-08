@@ -6,6 +6,8 @@ verify_ssl = true
 [dev-packages]
 mypy = "*"
 ipython = "*"
+hypothesis = "*"
+pytest = "*"
 
 [packages]
 aiohttp = "*"

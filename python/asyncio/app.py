@@ -21,7 +21,7 @@ def background(func: Func) -> Func:
 
 # Routes
 @routes.post('/v1/images/upload')
-async def post_image(request: web.Request):
+async def post_image(request: web.Request) -> web.Response:
     req = await request.json()
     urls = req.get('urls', None)
     if urls is None: 
@@ -47,25 +47,25 @@ async def get_images(request: web.Request) -> web.Response:
     
 # @background
 async def handle_job(job: Job) -> None:
-    await asyncio.sleep(10)
-    print(f'Done: {job.job_id}')
-    # pending, completed, failed = astuple(job.uploaded)
+    # await asyncio.sleep(10)
+    # print(f'Done: {job.job_id}')
+    pending, completed, failed = astuple(job.uploaded)
     
-    # job.status = InProgress()
-    # for url in pending:
-    #     try:
-    #         image = await hf.download_image(url)
-    #     except Exception as e:
-    #         print(f'Failed: {url}')
-    #         print(e)
-    #         failed.append(url)
-    #         job.uploaded = replace(job.uploaded, pending=hf.tail(job.uploaded.pending), failed=failed)
-    #     else:
-    #         print(f'Success: {url}')
-    #         completed.append(url)
-    #         job.uploaded = replace(job.uploaded, pending=hf.tail(job.uploaded.pending), completed=completed)
-    # job.finished = dt.datetime.utcnow().isoformat()
-    # job.status = Complete()
+    job.status = InProgress()
+    for url in pending:
+        try:
+            image = await hf.download_image(url)
+        except Exception as e:
+            print(f'Failed: {url}')
+            print(e)
+            failed.append(url)
+            job.uploaded = replace(job.uploaded, pending=hf.tail(job.uploaded.pending), failed=failed)
+        else:
+            print(f'Success: {url}')
+            completed.append(url)
+            job.uploaded = replace(job.uploaded, pending=hf.tail(job.uploaded.pending), completed=completed)
+    job.finished = dt.datetime.utcnow().isoformat()
+    job.status = Complete()
 
 def process_url(url: str):
     pass
