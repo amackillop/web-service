@@ -26,12 +26,16 @@ async def post_image(request: web.Request) -> web.Response:
     urls = req.get('urls', None)
     if urls is None: 
         return web.Response(status=400, text='Bad', reason='Bad Request. No `urls` field.')
+    job_id = str(uuid.uuid4())
+    request.app['jobs'][job_id] = submit_job(job_id, urls)
+    return web.Response(text=job_id+'\n')
+
+def submit_job(job_id: str, urls: list) -> Job:
     valid, invalid = hf.partition(hf.is_valid_url, urls)
     uploaded = Uploaded(pending=list(valid), failed=list(invalid))
-    job = Job(job_id=str(uuid.uuid4()), uploaded=uploaded)
-    request.app['jobs'][str(job.job_id)] = job
+    job = Job(job_id=job_id, uploaded=uploaded)
     asyncio.create_task(handle_job(job))
-    return web.Response(text=str(job.job_id))
+    return job
 
 @routes.get('/v1/images/upload/{job_id}')
 async def get_status(request: web.Request) -> web.Response:
@@ -47,7 +51,8 @@ async def get_images(request: web.Request) -> web.Response:
     
 # @background
 async def handle_job(job: Job) -> None:
-    # await asyncio.sleep(10)
+    # import random
+    # await asyncio.sleep(random.randint(1,5))
     # print(f'Done: {job.job_id}')
     pending, completed, failed = astuple(job.uploaded)
     
