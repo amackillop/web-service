@@ -100,8 +100,8 @@ async def start(app, host: str, port: int) -> Tuple[web.AppRunner, web.TCPSite]:
     return runner, server
 
 if __name__ == '__main__':
-    import tracemalloc
-    tracemalloc.start()
+    # import tracemalloc
+    # tracemalloc.start()
     host = '0.0.0.0'
     port = 8000
     app = web.Application()
