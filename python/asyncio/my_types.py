@@ -1,9 +1,9 @@
 from dataclasses import dataclass, field
 from typing import *
+
 import uuid
 import datetime as dt
 
-T = TypeVar('T')
 
 FuncType = Callable[..., Any]
 Func = TypeVar('Func', bound=FuncType)

@@ -21,6 +21,7 @@ def is_valid_url(url: str) -> bool:
         return False
     return all([result.scheme in ['http', 'https'], result.netloc, result.path])
 
+
 @contextlib.asynccontextmanager
 async def make_request(method: str, url: str, **kwargs) -> AsyncIterator:
     try:
@@ -44,10 +45,6 @@ async def download_image(url: str) -> str:
 
 
 # Functional Programming FTW
-# def take(n, iterable):
-#     "Return first n items of the iterable as a list"
-#     return list(islice(iterable, n))
-
 def tail(iterable: Iterable) -> Iterable:
     "Return an iterator over the last n items"
     deq = collections.deque(iterable)

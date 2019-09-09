@@ -12,13 +12,6 @@ import os
 
 routes = web.RouteTableDef()
 
-def background(func: Func) -> Func:
-    @wraps(func)
-    def wrapped(*args, **kwargs):
-        loop = asyncio.get_event_loop()
-        loop.run_in_executor(None, func, *args, **kwargs)
-    return wrapped
-
 # Routes
 @routes.post('/v1/images/upload')
 async def post_image(request: web.Request) -> web.Response:
@@ -30,12 +23,6 @@ async def post_image(request: web.Request) -> web.Response:
     request.app['jobs'][job_id] = submit_job(job_id, urls)
     return web.Response(text=job_id+'\n')
 
-def submit_job(job_id: str, urls: list) -> Job:
-    valid, invalid = hf.partition(hf.is_valid_url, urls)
-    uploaded = Uploaded(pending=list(valid), failed=list(invalid))
-    job = Job(job_id=job_id, uploaded=uploaded)
-    asyncio.create_task(handle_job(job))
-    return job
 
 @routes.get('/v1/images/upload/{job_id}')
 async def get_status(request: web.Request) -> web.Response:
@@ -45,19 +32,27 @@ async def get_status(request: web.Request) -> web.Response:
         return web.Response(text=f'Job {job_id} was not found.')
     return web.Response(text=str(job))
 
+
 @routes.get('/v1/images')
 async def get_images(request: web.Request) -> web.Response:
     return web.Response(text='hello')
     
-# @background
+
+# Helpers
+def submit_job(job_id: str, urls: list) -> Job:
+    valid, invalid = hf.partition(hf.is_valid_url, urls)
+    uploaded = Uploaded(pending=list(valid), failed=list(invalid))
+    job = Job(job_id=job_id, uploaded=uploaded)
+    asyncio.create_task(handle_job(job))
+    return job
+
+
 async def handle_job(job: Job) -> None:
-    # import random
-    # await asyncio.sleep(random.randint(1,5))
-    # print(f'Done: {job.job_id}')
     job.status = InProgress()
     await asyncio.gather(*[handle_download(job, url) for url in job.uploaded.pending])
     job.finished = dt.datetime.utcnow().isoformat()
     job.status = Complete()
+
 
 async def handle_download(job: Job, url: str) -> str:
     try:
@@ -74,10 +69,6 @@ async def handle_download(job: Job, url: str) -> str:
     job.uploaded.pending.remove(url)
     return image
 
-def process_url(url: str):
-    pass
-    # time.sleep(10)
-    # print('done sleeping')
 
 def _upload_to_imgur(self, image_as_b64: str) -> requests.Response:
     """Given a base 64 string, upload it as an image to Imgur."""
@@ -92,12 +83,14 @@ def _upload_to_imgur(self, image_as_b64: str) -> requests.Response:
     resp = hf.make_request('POST', url, headers=headers, data=data)
     return resp
 
+
 async def start(app, host: str, port: int) -> Tuple[web.AppRunner, web.TCPSite]:
     runner = web.AppRunner(app)
     await runner.setup()
     server = web.TCPSite(runner, host, port)
     await server.start()
     return runner, server
+
 
 if __name__ == '__main__':
     # import tracemalloc
@@ -116,5 +109,3 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         loop.run_until_complete(runner.cleanup())
     
-    # web.run_app(app, host=host, port=port)
-    # asyncio.run(main(address, port))
