@@ -22,19 +22,14 @@ def is_valid_url(url: str) -> bool:
     return all([result.scheme in ['http', 'https'], result.netloc, result.path])
 
 
-@contextlib.asynccontextmanager
 async def make_request(method: str, url: str, **kwargs) -> AsyncIterator:
-    try:
-        async with aiohttp.ClientSession(raise_for_status=True) as session:
-            async with getattr(session, method)(url) as resp:
-                yield resp
-    finally:
-        pass
+    async with aiohttp.request(method, url, **kwargs) as resp:
+        return resp
 
 
 async def download_image(url: str) -> str:
     """Download and verify image from given URL."""
-    async with make_request('get', url) as resp:
+    async with aiohttp.request('get', url, raise_for_status=True) as resp:
         content = await resp.read()
 
     # Weak check that the page content is actually an image. 
