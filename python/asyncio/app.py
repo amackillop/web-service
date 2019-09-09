@@ -54,23 +54,25 @@ async def handle_job(job: Job) -> None:
     # import random
     # await asyncio.sleep(random.randint(1,5))
     # print(f'Done: {job.job_id}')
-    pending, completed, failed = astuple(job.uploaded)
-    
     job.status = InProgress()
-    for url in pending:
-        try:
-            image = await hf.download_image(url)
-        except Exception as e:
-            print(f'Failed: {url}')
-            print(e)
-            failed.append(url)
-            job.uploaded = replace(job.uploaded, pending=hf.tail(job.uploaded.pending), failed=failed)
-        else:
-            print(f'Success: {url}')
-            completed.append(url)
-            job.uploaded = replace(job.uploaded, pending=hf.tail(job.uploaded.pending), completed=completed)
+    await asyncio.gather(*[handle_download(job, url) for url in job.uploaded.pending])
     job.finished = dt.datetime.utcnow().isoformat()
     job.status = Complete()
+
+async def handle_download(job: Job, url: str) -> str:
+    try:
+        image = await hf.download_image(url)
+    except Exception as e:
+        print(f'Failed: {url}')
+        print(e)
+        job.uploaded.failed.append(url)
+        job.uploaded.pending.remove(url)
+        return 'Failed'
+
+    print(f'Success: {url}')
+    job.uploaded.completed.append(url)
+    job.uploaded.pending.remove(url)
+    return image
 
 def process_url(url: str):
     pass
@@ -98,8 +100,8 @@ async def start(app, host: str, port: int) -> Tuple[web.AppRunner, web.TCPSite]:
     return runner, server
 
 if __name__ == '__main__':
-    # import tracemalloc
-    # tracemalloc.start()
+    import tracemalloc
+    tracemalloc.start()
     host = '0.0.0.0'
     port = 8000
     app = web.Application()
