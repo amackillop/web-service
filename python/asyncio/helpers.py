@@ -1,18 +1,14 @@
 
 import imghdr
-import requests
 import base64
-from io import BytesIO
-import reprlib
-from urllib.parse import urlparse
-from collections import deque
-import itertools
-import aiohttp
-import contextlib
 import collections
+from io import BytesIO
+from urllib.parse import urlparse
+import itertools
 
-from typing import TypeVar, Callable, Iterable, Iterator, Tuple 
+from typing import TypeVar, Callable, Iterable, Iterator, Tuple
 
+import aiohttp
 
 T = TypeVar('T')
 
@@ -49,7 +45,7 @@ def tail(iterable: Iterable) -> Iterable:
     deq.popleft()
     return deq
 
-def partition(predicate: Callable[[T], bool] , iterable: Iterable[T]) -> Tuple[Iterator[T], Iterator[T]]:
+def partition(predicate: Callable[[T], bool], iterable: Iterable[T]) -> Tuple[Iterator[T], Iterator[T]]:
     'Use a predicate to partition entries into false entries and true entries'
     t1, t2 = itertools.tee(iterable)
     return filter(predicate, t1), itertools.filterfalse(predicate, t2)

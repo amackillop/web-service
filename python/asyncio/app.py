@@ -8,11 +8,11 @@ import uuid
 from typing import Tuple
 
 import uvloop
-from pymonads.either import Either
-
+import pymonads as pm
 
 from aiohttp import web
 from aiohttp.client_exceptions import ClientError
+
 from my_types import Job, Uploaded
 import helpers as hf
 
@@ -62,25 +62,19 @@ async def _handle_job(job: Job) -> None:
     job.finished = dt.datetime.utcnow().isoformat()
     job.status = 'complete'
 
-
-async def _handle_download(job: Job, url: str) -> Either:
-    # import random
-    # await asyncio.sleep(random.random())
-    # print('Done: ', job.job_id)
-    # return 'cat'
+async def _handle_download(job: Job, url: str) -> pm.Either[str, str]:
     try:
         image = await hf.download_image(url)
     except (ClientError, IOError) as exc:
         print(f'Failed: {url}')
-        print(exc)
         job.uploaded.failed.append(url)
         job.uploaded.pending.remove(url)
-        return ''
+        return pm.Left(str(exc))
 
     print(f'Success: {url}')
     job.uploaded.completed.append(url)
     job.uploaded.pending.remove(url)
-    return image
+    return pm.Right(image)
 
 
 # def _upload_to_imgur(self, image_as_b64: str) -> requests.Response:
@@ -97,7 +91,7 @@ async def _handle_download(job: Job, url: str) -> Either:
 #     return resp
 
 
-async def start(app: web.Application, host: str, port: int) -> Tuple[web.AppRunner, web.TCPSite]:
+async def start(app: web.Application, host: str, port: int) -> web.AppRunner:
     """Start the server"""
     runner = web.AppRunner(app)
     await runner.setup()
