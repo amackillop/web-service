@@ -15,6 +15,7 @@ aiohttp = "*"
 requests = "*"
 redis = "*"
 uvloop = "*"
+pymonads = "*"
 
 [requires]
 python_version = "3.7"

@@ -1,37 +1,30 @@
-from dataclasses import dataclass, field
-from typing import *
+"""
+Types used project wide to catch runtime errors before they happen
+"""
 
-import uuid
+from dataclasses import dataclass, field
+from typing import TypeVar, Callable, Any, List
+
 import datetime as dt
 
-T = TypeVar('T')
 
 FuncType = Callable[..., Any]
 Func = TypeVar('Func', bound=FuncType)
 
-@dataclass(frozen=True)
-class Pending: pass
-
-@dataclass(frozen=True)
-class InProgress: pass
-
-@dataclass(frozen=True)
-class Complete: pass
-
-# Status = NewType('Status', str)
-Status = Union[Pending, InProgress, Complete]
 
 @dataclass(frozen=True)
 class Uploaded:
+    """Represents uploaded urls"""
     pending: List[str] = field(default_factory=list)
     completed: List[str] = field(default_factory=list)
     failed: List[str] = field(default_factory=list)
 
 @dataclass()
 class Job:
+    """Represents a submitted job"""
     uploaded: Uploaded
     job_id: str
     created: str = field(default_factory=lambda: dt.datetime.utcnow().isoformat())
     finished: str = ''
-    status: Status = Pending()
+    status: str = 'Pending'
     

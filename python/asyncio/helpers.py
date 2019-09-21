@@ -11,7 +11,10 @@ import aiohttp
 import contextlib
 import collections
 
-from my_types import *
+from typing import TypeVar, Callable, Iterable, Iterator, Tuple 
+
+
+T = TypeVar('T')
 
 # HTTP stuff
 def is_valid_url(url: str) -> bool:
@@ -22,7 +25,7 @@ def is_valid_url(url: str) -> bool:
     return all([result.scheme in ['http', 'https'], result.netloc, result.path])
 
 
-async def make_request(method: str, url: str, **kwargs) -> AsyncIterator:
+async def make_request(method: str, url: str, **kwargs) -> aiohttp.ClientResponse:
     async with aiohttp.request(method, url, **kwargs) as resp:
         return resp
 
