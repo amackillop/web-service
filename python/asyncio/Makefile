@@ -1,6 +1,4 @@
-DIST="$(dir .dist)"
-
-all: wheels app #docker # tex # html docx rtf
+all: wheels app
 
 wheels:
 	rm -f .dist/*
