@@ -1,11 +1,11 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "2b8eebd0345e0a4ed48be11fd174f886846fe4aeda96d4f7ff6b9d841e1d7cde"
+            "sha256": "e25f90fc7b85b5f625114762f31bb4a0a6ac9eec17ed6ca3cfa1fd45d2a46d0a"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_version": "3.7"
+            "python_version": "3.7.4"
         },
         "sources": [
             {
@@ -33,14 +33,6 @@
             ],
             "index": "pypi",
             "version": "==3.6.2"
-        },
-        "aioify": {
-            "hashes": [
-                "sha256:c49729f9a46459fffc4ffe3cfb889712bc12da0a7840e13639f8fd6bca31842e",
-                "sha256:dfca9b2878570215a7d98e3a17aeaee9ef85a0a26ecc910eeb02e87d2dcb3150"
-            ],
-            "index": "pypi",
-            "version": "==0.3.2"
         },
         "async-timeout": {
             "hashes": [
@@ -77,13 +69,6 @@
             ],
             "version": "==2.8"
         },
-        "module-wrapper": {
-            "hashes": [
-                "sha256:183c3243d3e5e7a2299e693648709dd2142edb8b3e41a2a7008366aa6911ad56",
-                "sha256:630cd940268f8e398d637f48afcd6c8e48a9119aa7284ca535d8dad66771ba9f"
-            ],
-            "version": "==0.2.4"
-        },
         "multidict": {
             "hashes": [
                 "sha256:024b8129695a952ebd93373e45b5d341dbb87c17ce49637b34000093f243dd4f",
@@ -118,16 +103,13 @@
             ],
             "version": "==4.5.2"
         },
-        "poetry-version": {
-            "hashes": [
-                "sha256:75d3f7ae3ede0539529a81170e77441bc753827f5a1de20ec8174877471d8eaf",
-                "sha256:d0edca96a5798e668fb81cdc5941975d1cb0b6020df4b95464b2939605654617"
-            ],
-            "version": "==0.1.3"
-        },
         "pymonads": {
-            "editable": true,
-            "path": "./../../../pymonads"
+            "hashes": [
+                "sha256:2d1fd2f555cbfbbd71aa87181c80915b818155fbb2a8c2632a9b46aebfb01285",
+                "sha256:8b3d7803fe560f6a72b8f6eaaa7e115e905ea316900102482257064ec57f6c45"
+            ],
+            "index": "pypi",
+            "version": "==0.1.4"
         },
         "requests": {
             "hashes": [
@@ -136,13 +118,6 @@
             ],
             "index": "pypi",
             "version": "==2.22.0"
-        },
-        "tomlkit": {
-            "hashes": [
-                "sha256:32c10cc16ded7e4101c79f269910658cc2a0be5913f1252121c3cd603051c269",
-                "sha256:96e6369288571799a3052c1ef93b9de440e1ab751aa045f435b55e9d3bcd0690"
-            ],
-            "version": "==0.5.8"
         },
         "urllib3": {
             "hashes": [

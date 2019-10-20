@@ -89,6 +89,7 @@ async def _handle_download(job: Job, url: str) -> pm.Either[str]:
 async def _upload(image: pm.Either[str]) -> pm.Either[str]:
     return either.either(identity, _upload_to_imgur, image)
 
+
 async def _upload_to_imgur(image_as_b64: str) -> pm.Either[web.Response]:
     """Given a base 64 string, upload it as an image tuploado Imgur."""
     url = 'https://api.imgur.com/3/image'
@@ -131,6 +132,6 @@ def main() -> None:
 
 
 if __name__ == '__main__':
-    import tracemalloc
-    tracemalloc.start()
+    # import tracemalloc
+    # tracemalloc.start()
     main()

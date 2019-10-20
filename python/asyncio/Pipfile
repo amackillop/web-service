@@ -15,8 +15,7 @@ mypyls = {extras = ["default-mypy"],file = "https://github.com/matangover/mypyls
 aiohttp = "*"
 requests = "*"
 uvloop = "*"
-pymonads = {editable = true,path = "./../../../pymonads"}
-aioify = "*"
+pymonads = "*" 
 
 [requires]
-python_version = "3.7"
+python_version = "3.7.4"
