@@ -9,13 +9,14 @@ ipython = "*"
 hypothesis = "*"
 pytest = "*"
 pylint = "*"
+mypyls = {extras = ["default-mypy"],file = "https://github.com/matangover/mypyls/archive/master.zip"}
 
 [packages]
 aiohttp = "*"
 requests = "*"
-redis = "*"
 uvloop = "*"
-pymonads = "==0.1.1"
+pymonads = {editable = true,path = "./../../../pymonads"}
+aioify = "*"
 
 [requires]
 python_version = "3.7"

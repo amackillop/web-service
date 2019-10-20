@@ -3,12 +3,20 @@ Image uploading service implemented using asyncio/aiohttp
 """
 
 import asyncio
+import base64
+import binascii
 import datetime as dt
+import os
 import uuid
 from typing import Tuple
 
-import uvloop
+# from aioify import aioify
+import uvloop # type: ignore
 import pymonads as pm
+import pymonads.either as either
+from pymonads.utils import identity
+
+# aio_either = aioify(obj=either, name='aio_either')
 
 from aiohttp import web
 from aiohttp.client_exceptions import ClientError
@@ -58,11 +66,12 @@ def _submit_job(job_id: str, urls: list) -> Job:
 
 async def _handle_job(job: Job) -> None:
     job.status = 'in-progress'
-    await asyncio.gather(*[_handle_download(job, url) for url in job.uploaded.pending])
+    images = await asyncio.gather(*[_handle_download(job, url) for url in job.uploaded.pending])
+    imgur_links = await asyncio.gather(*[_upload(image) for image in images])
     job.finished = dt.datetime.utcnow().isoformat()
     job.status = 'complete'
 
-async def _handle_download(job: Job, url: str) -> pm.Either[str, str]:
+async def _handle_download(job: Job, url: str) -> pm.Either[str]:
     try:
         image = await hf.download_image(url)
     except (ClientError, IOError) as exc:
@@ -74,21 +83,24 @@ async def _handle_download(job: Job, url: str) -> pm.Either[str, str]:
     print(f'Success: {url}')
     job.uploaded.completed.append(url)
     job.uploaded.pending.remove(url)
-    return pm.Right(image)
+    return pm.Left(image)
 
 
-# def _upload_to_imgur(self, image_as_b64: str) -> requests.Response:
-#     """Given a base 64 string, upload it as an image to Imgur."""
-#     url = 'https://api.imgur.com/3/image'
-#     try:
-#         base64.b64decode(image_as_b64, validate=True)
-#     except base64.binascii.Error:
-#         msg = 'image_as_b64 needs to be a valid base-64 string.'
-#         raise ValueError(msg)
-#     data = {'image': image_as_b64}
-#     headers = {'Authorization': f'Client-ID {os.environ["CLIENT_ID"]}'}
-#     resp = hf.make_request('POST', url, headers=headers, data=data)
-#     return resp
+async def _upload(image: pm.Either[str]) -> pm.Either[str]:
+    return either.either(identity, _upload_to_imgur, image)
+
+async def _upload_to_imgur(image_as_b64: str) -> pm.Either[web.Response]:
+    """Given a base 64 string, upload it as an image tuploado Imgur."""
+    url = 'https://api.imgur.com/3/image'
+    try:
+        base64.b64decode(image_as_b64, validate=True)
+    except binascii.Error:
+        msg = 'image_as_b64 needs to be a valid base-64 string.'
+        return pm.Left(msg)
+    data = {'image': image_as_b64}
+    headers = {'Authorization': f'Client-ID {os.environ["CLIENT_ID"]}'}
+    resp = await hf.make_request('POST', url, headers=headers, data=data)
+    return pm.Right(resp)
 
 
 async def start(app: web.Application, host: str, port: int) -> web.AppRunner:
